@@ -1,11 +1,9 @@
 ﻿using Microsoft.ML.Data;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace HelloML.Model
 {
+    // Used to inspect the transformed nominal input
+    // data to binary sparce vectors
     public class TransformedInput
     {
         [ColumnName("Features")]

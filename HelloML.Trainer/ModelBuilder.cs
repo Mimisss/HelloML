@@ -1,9 +1,6 @@
 ﻿using HelloML.Model;
 using Microsoft.ML;
-using Microsoft.ML.Trainers;
 using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 
 namespace HelloML.Trainer
@@ -36,50 +33,7 @@ namespace HelloML.Trainer
 
             // 3. Train, evaluate and save the model
             Console.WriteLine("Training the model...");
-            TrainEvaluateSaveModel(trainingData, testData, dataPrepPipeline, _modelPath);
-
-            #region DEBUG
-            // Inspecting the Feature (sparce) vectors for debugging
-            //var transformedData = trainedModel.Transform(trainingData);
-            //foreach (var row in Context.Data.CreateEnumerable<TransformedInput>(transformedData, reuseRowObject: false))
-            //{
-            //    var featuresString = "";
-            //    var features = row.Features;
-
-            //    // Get the indices and values from the VBuffer
-            //    var indices = features.GetIndices().ToArray();
-            //    var values = features.GetValues().ToArray();
-
-            //    // Reconstruct a more readable string for the sparse vector
-            //    for (int i = 0; i < indices.Length; i++)
-            //    {
-            //        featuresString += $"[{indices[i]}:{values[i]}] ";
-            //    }
-
-            //    Console.WriteLine($"Label: {row.Label} | Features Vector (Sparse): {featuresString}");
-            //}
-            #endregion
-
-            #region Use the model for a single prediction
-            //var predictionEngine = Context.Model.CreatePredictionEngine<ModelInput, ModelOutput>(trainedModel);
-
-            //var newSample = new ModelInput
-            //{
-            //    Outlook = "sunny",
-            //    Temperature = "mild",
-            //    Humidity = "normal",
-            //    Windy = "yes"
-            //};
-
-            //var prediction = predictionEngine.Predict(newSample);
-
-            //Console.WriteLine("\n---------------------------------------------------");
-            //Console.WriteLine($"Prediction for a new sample:");
-            //Console.WriteLine($"Input: Outlook='{newSample.Outlook}', Temperature='{newSample.Temperature}', Humidity='{newSample.Humidity}', Windy='{newSample.Windy}'");
-            //Console.WriteLine($"Prediction: Is 'play' likely? {(prediction.PredictedPlay ? "Yes" : "No")}");
-            //Console.WriteLine($"Probability: {prediction.Probability:P2}");
-            //Console.WriteLine("---------------------------------------------------");
-            #endregion
+            TrainEvaluateSaveModel(trainingData, testData, dataPrepPipeline, _modelPath, true);
         }
 
         #region PRIVATE
@@ -89,20 +43,18 @@ namespace HelloML.Trainer
             var pipeline = Context.Transforms.Conversion.MapValueToKey(inputColumnName: "Outlook", outputColumnName: "OutlookKey")
                 .Append(Context.Transforms.Conversion.MapValueToKey(inputColumnName: "Temperature", outputColumnName: "TemperatureKey"))
                 .Append(Context.Transforms.Conversion.MapValueToKey(inputColumnName: "Humidity", outputColumnName: "HumidityKey"))
-                .Append(Context.Transforms.Conversion.MapValueToKey(inputColumnName: "Windy", outputColumnName: "WindyKey"))
-                //.Append(Context.Transforms.Conversion.MapValueToKey(inputColumnName: "Label", outputColumnName: "LabelKey"))
+                .Append(Context.Transforms.Conversion.MapValueToKey(inputColumnName: "Windy", outputColumnName: "WindyKey"))                
                 .Append(Context.Transforms.Categorical.OneHotEncoding(inputColumnName: "OutlookKey", outputColumnName: "OutlookEncoded"))
                 .Append(Context.Transforms.Categorical.OneHotEncoding(inputColumnName: "TemperatureKey", outputColumnName: "TemperatureEncoded"))
                 .Append(Context.Transforms.Categorical.OneHotEncoding(inputColumnName: "HumidityKey", outputColumnName: "HumidityEncoded"))
-                .Append(Context.Transforms.Categorical.OneHotEncoding(inputColumnName: "WindyKey", outputColumnName: "WindyEncoded"))
-                //.Append(Context.Transforms.Categorical.OneHotEncoding(inputColumnName: "LabelKey", outputColumnName: "LabelEncoded"))
+                .Append(Context.Transforms.Categorical.OneHotEncoding(inputColumnName: "WindyKey", outputColumnName: "WindyEncoded"))                
                 // Concatenate all feature columns into a single "Features" column
                 .Append(Context.Transforms.Concatenate("Features", "OutlookEncoded", "TemperatureEncoded", "HumidityEncoded", "WindyEncoded"));
 
             return pipeline;
         }
 
-        private static void TrainEvaluateSaveModel(IDataView trainingDataView, IDataView testDataView, IEstimator<ITransformer> dataProcessPipeline, string modelPath)
+        private static void TrainEvaluateSaveModel(IDataView trainingDataView, IDataView testDataView, IEstimator<ITransformer> dataProcessPipeline, string modelPath, bool inspectTransformation = false)
         {
             // Set the training algorithm
             var trainer = Context
@@ -115,6 +67,13 @@ namespace HelloML.Trainer
 
             // Train the model            
             var trainedModel = trainingPipeline.Fit(trainingDataView);
+                                    
+            if (inspectTransformation)
+            {
+                // Inspect the Feature sparce vectors for debugging
+                var transformedData = trainedModel.Transform(trainingDataView);
+                ConsoleHelper.PrintTransformedData(Context, transformedData);
+            }
 
             // Evaluate the model and show accuracy stats
             Console.WriteLine("Evaluating the model...");
@@ -129,25 +88,5 @@ namespace HelloML.Trainer
             Console.WriteLine("The model is saved to {0}\n\n\n", modelPath);
         }
         #endregion
-
-        public static ModelOutput RunModel(string modelFileName, ModelInput input)
-        {
-            Console.WriteLine("Loading the model...");
-            var model = Context.Model.Load(modelFileName, out _);
-            Console.WriteLine("Loading complete.");
-
-            Console.WriteLine("Making prediction...");
-            var predictionEngine = Context.Model.CreatePredictionEngine<ModelInput, ModelOutput>(model);
-            var prediction = predictionEngine.Predict(input);
-
-            Console.WriteLine("\n---------------------------------------------------");
-            Console.WriteLine($"Prediction for a new sample:");
-            Console.WriteLine($"Input: Outlook='{input.Outlook}', Temperature='{input.Temperature}', Humidity='{input.Humidity}', Windy='{input.Windy}'");
-            Console.WriteLine($"Prediction: Is 'play' likely? {(prediction.PredictedPlay ? "Yes" : "No")}");
-            Console.WriteLine($"Probability: {prediction.Probability:P2}");
-            Console.WriteLine("---------------------------------------------------");
-
-            return prediction;
-        }
     }
 }
