@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "HelloML.Trainer": {
+      "commandName": "Project"
+    }
+  }
+}

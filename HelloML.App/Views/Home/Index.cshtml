@@ -1,0 +1,79 @@
+﻿@using HelloML.Model
+@model ModelInput
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <form id="playGolfForm" role="form" method="post" action="@Url.Action("Predict", "PlayGolf")">
+            <div class="row">
+                <div class="col-md-6">
+                    <label asp-for="Outlook"></label>
+                    <input asp-for="Outlook" class="form-control" value="sunny" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label asp-for="Temperature"></label>
+                    <input asp-for="Temperature" class="form-control" value="hot" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label asp-for="Humidity"></label>
+                    <input asp-for="Humidity" class="form-control" value="normal" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label asp-for="Windy"></label>
+                    <input asp-for="Windy" class="form-control" value="yes" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mt-3">
+                    <button id="btnPredict" type="submit" class="btn btn-danger btn-lg btn-block">PLAY GOLF?</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mt-3">
+                    <label class="bold">IS PLAY LIKELY?</label>
+                    <span type="text" id="prediction" class="form-control"></span>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    $('#playGolfForm').on('submit', function (event) {
+        event.preventDefault();
+        debugger;
+        $("#prediction").html("Predicting ...");
+
+        let url = $(this).attr('action');
+        let formData = $(this).serialize();
+
+        // post to the server passing the serialized form data. The response
+        // json whether a success or a failure is handled in the success callback.
+        // The error callback handles only the case where the post couldn't be send
+        // successfully.
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: formData,
+            success: function (response) {
+                debugger;
+                $("#prediction").html(response.predictedPlay ? "YES" : "NO");
+            },
+            error: function (response) {
+                alert("ERROR");
+            }
+        });
+    });
+</script>
+}
