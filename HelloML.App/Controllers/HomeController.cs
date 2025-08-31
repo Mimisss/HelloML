@@ -16,7 +16,7 @@ namespace HelloML.App.Controllers
 
         public IActionResult Index()
         {
-            var model = new ModelInput();
+            var model = new InputDataModel();
             return View(model);
         }
 

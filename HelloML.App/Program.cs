@@ -1,6 +1,4 @@
-using HelloML.App.Common.Settings;
 using HelloML.Model;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.ML;
 
 namespace HelloML.App
@@ -13,9 +11,6 @@ namespace HelloML.App
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-
-            builder.Services.Configure<GlobalAppSettings>(
-                builder.Configuration.GetSection("AppSettings"));
 
             var mlModelPath = Path.Combine(builder.Environment.ContentRootPath, @"ML\weather.nominal.zip");
 

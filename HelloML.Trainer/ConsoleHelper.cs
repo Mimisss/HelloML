@@ -38,19 +38,5 @@ namespace HelloML.Trainer
             Console.WriteLine($"Area Under Curve (AUC): {metrics.AreaUnderRocCurve:P2}");
             Console.WriteLine($"F1 Score: {metrics.F1Score:P2}");
         }
-
-        public static void PrintRegressionMetrics(string name, RegressionMetrics metrics)
-        {
-            // Print regression evaluation metrics
-            Console.WriteLine($"*************************************************");
-            Console.WriteLine($"*       Metrics for {name} regression model      ");
-            Console.WriteLine($"*------------------------------------------------");
-            Console.WriteLine($"*       LossFn:        {metrics.LossFunction:0.##}");
-            Console.WriteLine($"*       R2 Score:      {metrics.RSquared:0.##}");
-            Console.WriteLine($"*       Absolute loss: {metrics.MeanAbsoluteError:#.##}");
-            Console.WriteLine($"********Squared loss:  {metrics.MeanSquaredError:#.##}");
-            Console.WriteLine($"*       RMS loss:      {metrics.RootMeanSquaredError:#.##}");
-            Console.WriteLine($"*************************************************");
-        }
     }
 }

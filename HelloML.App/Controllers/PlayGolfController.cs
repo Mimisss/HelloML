@@ -1,4 +1,5 @@
 ﻿using HelloML.App.Application;
+using HelloML.App.Models;
 using HelloML.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.ML;
@@ -14,9 +15,17 @@ namespace HelloML.App.Controllers
             Service = new PlayGolfPredictionService(engine);
         }
 
-        public IActionResult Predict(ModelInput input)
+        public IActionResult Predict(InputDataModel input)
         {
-            var response = Service.Predict(input);
+            var model = new ModelInput
+            {
+                Outlook = input.Outlook,
+                Temperature = input.Temperature,
+                Humidity = input.Humidity,
+                Windy = input.Windy
+            };
+
+            var response = Service.Predict(model);
             return Json(response);
         }
     }

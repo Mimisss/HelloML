@@ -1,9 +1,35 @@
-﻿@using HelloML.Model
-@model ModelInput
+﻿@model InputDataModel
+@{
+    List<SelectListItem> outlookItems = new List<SelectListItem>()
+    {
+        new SelectListItem { Text = "Ηλιοφάνεια", Value = "sunny" },
+        new SelectListItem { Text = "Νεφελώδης", Value = "overcast" },
+        new SelectListItem { Text = "Βροχόπτωση", Value = "rainy" },
+    };
+
+    List<SelectListItem> temperatureItems = new List<SelectListItem>()
+    {
+        new SelectListItem { Text = "Υψηλή", Value = "hot" },
+        new SelectListItem { Text = "Φυσιολογική", Value = "mild" },
+        new SelectListItem { Text = "Χαμηλή", Value = "cool" }
+    };
+
+    List<SelectListItem> humidityItems = new List<SelectListItem>()
+    {
+        new SelectListItem { Text = "Υψηλή", Value = "high" },
+        new SelectListItem { Text = "Φυσιολογική", Value = "normal" }
+    };
+
+    List<SelectListItem> windyItems = new List<SelectListItem>()
+    {
+        new SelectListItem { Text = "Ναι", Value = "yes" },
+        new SelectListItem { Text = "Όχι", Value = "no" }
+    };
+}
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <p>Learn about <a href="https://dotnet.microsoft.com/en-us/apps/ai/ml-dotnet">building with ML.NET</a>.</p>
 </div>
 
 <div class="row">
@@ -12,36 +38,36 @@
             <div class="row">
                 <div class="col-md-6">
                     <label asp-for="Outlook"></label>
-                    <input asp-for="Outlook" class="form-control" value="sunny" />
+                    @Html.DropDownListFor(model => model.Outlook, outlookItems, new { @class = "form-control" })
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6">
                     <label asp-for="Temperature"></label>
-                    <input asp-for="Temperature" class="form-control" value="hot" />
+                    @Html.DropDownListFor(model => model.Temperature, temperatureItems, new { @class = "form-control" })
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6">
                     <label asp-for="Humidity"></label>
-                    <input asp-for="Humidity" class="form-control" value="normal" />
+                    @Html.DropDownListFor(model => model.Humidity, humidityItems, new { @class = "form-control" })
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6">
                     <label asp-for="Windy"></label>
-                    <input asp-for="Windy" class="form-control" value="yes" />
+                    @Html.DropDownListFor(model => model.Windy, windyItems, new { @class = "form-control" })
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6 mt-3">
-                    <button id="btnPredict" type="submit" class="btn btn-danger btn-lg btn-block">PLAY GOLF?</button>
+                    <button id="btnPredict" type="submit" class="btn btn-danger btn-lg btn-block">ΝΑ ΠΑΙΞΩ ΓΚΟΛΦ;</button>
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-6 mt-3">
-                    <label class="bold">IS PLAY LIKELY?</label>
-                    <span type="text" id="prediction" class="form-control"></span>
+                <div class="col-md-6 mt-3">                    
+                    <span type="text" id="prediction" class="form-control mb-1"></span>
+                    <span type="text" id="probability" class="form-control"></span>                    
                 </div>
             </div>
         </form>
@@ -51,8 +77,7 @@
 @section Scripts {
 <script>
     $('#playGolfForm').on('submit', function (event) {
-        event.preventDefault();
-        debugger;
+        event.preventDefault();        
         $("#prediction").html("Predicting ...");
 
         let url = $(this).attr('action');
@@ -66,9 +91,10 @@
             url: url,
             type: "POST",
             data: formData,
-            success: function (response) {
-                debugger;
-                $("#prediction").html(response.predictedPlay ? "YES" : "NO");
+            success: function (response) {                
+                var probability = Math.round(response.probability * 100).toFixed(0);
+                $("#prediction").html(response.predictedPlay ? "ΝΑΙ" : "ΟΧΙ");
+                $("#probability").html("Πιθανότητα " + probability + "%");
             },
             error: function (response) {
                 alert("ERROR");
